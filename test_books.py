@@ -1,16 +1,16 @@
 from unittest.case import TestCase
-from books import ChildrenBook, HorrorBook
+from books import BookshopWebiteBook
 import unittest
 
 class Test_ChildrenBook(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.children_book = ChildrenBook("Little Red Riding Hood", "Unknown")
-        self.horror_book = HorrorBook("Goosebumps", "R. L. Stine")
+        self.children_book = BookshopWebiteBook(0, "Little Red Riding Hood", "£53.00")
+        self.horror_book = BookshopWebiteBook(1, "Goosebumps", "£55.00")
     
     def test_to_dict(self):
-        self.assertIn("title", self.children_book.to_dict(), f"title in {self.children_book}")
-        self.assertIn("author", self.horror_book.to_dict())
+        self.assertIn(0, self.children_book.set_dict())
+        self.assertIn("Little Red Riding Hood", self.children_book.set_dict()[0]["title"])
 
 
 
