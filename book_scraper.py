@@ -1,9 +1,7 @@
-from save_to_file import CSVFile
+from save_to_file import CSVFile, TxtFile
 from books import Book, BookshopStoreBook, BookshopWebiteBook  
 import requests
 from bs4 import BeautifulSoup
-from abc import ABC, abstractmethod
-
 
 class Website:
 
@@ -18,7 +16,7 @@ class Website:
             print(f"Connection made - {res.status_code} status code")
             return res.text
 
-class WebsiteScraper(ABC):
+class WebsiteScraper:
 
     def __init__(self, html_response):
         self.html_response = html_response
@@ -60,15 +58,16 @@ class WebsiteScraper(ABC):
             tag_results.append(html.text.strip())
         return tag_results
 
+    def move_to_next_page(self, next_page_tag):
+        pass
 
 class BookshopWebsiteScraper(WebsiteScraper):
 
-    def set_books(self, title: str, price: str) -> dict:
+    def set_books(self, title: str, price: str):
         for book_title, book_price in zip(price, title):
             bookshop_book = BookshopWebiteBook()
-            self.books = bookshop_book.add_book(book_title, book_price)
-        return self.books
-   
+            bookshop_book.add_book(book_title, book_price)
+
 
 website = Website("https://books.toscrape.com").connect()
 
@@ -78,3 +77,9 @@ books = book_test.get_tag("h3")
 clean_prices = book_test.clean_tag_results(prices, "Â", "In stock")
 book_test.set_books(clean_prices, books)
 
+test = BookshopStoreBook()
+test.add_book("test", "£test")
+test.show_all_books_by_store()
+
+test1 = BookshopWebiteBook()
+test1.show_all_books_by_store()

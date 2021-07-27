@@ -35,29 +35,31 @@ class Book(ABC):
         Book.bookshop_books[self.book_number]["qty"] = 0
         print(f"Book Number: {self.book_number}\n{title}\n{price}\nAdded to the system")
 
+    def show_all_books_by_store(self):
+        for book_number, _ in self.bookshop_books.items():
+            if self.bookshop_books[book_number]["location"] == self.location:
+                print(self.bookshop_books[book_number])
+
     @abstractmethod
     def set_qty(self, book_number, qty):
         pass
 
 class BookshopWebiteBook(Book):
-    
-    location = "Online"
 
-    def set_qty(self, book_number, qty):
-        self.bookshop_books[book_number] = qty
-        print(f"{book_number} - Website stock amended to {qty}")
-    
-class BookshopStoreBook(Book):
-
-    location = "In-store"
+    location = "Online Store"
 
     def set_qty(self, book_number, qty):
         self.bookshop_books[book_number]["qty"] = qty
-        print(f"{self.bookshop_books[book_number]['title']} - In-store stock amended to {qty}")
+        print(f"{self.bookshop_books[book_number]['title']} - Website stock amended to {qty}")
+        
+
+class BookshopStoreBook(Book):
+
+    location = "Store"
+
+    def set_qty(self, book_number, qty):
+        self.bookshop_books[book_number]["qty"] = qty
+        print(f"{self.bookshop_books[book_number]['title']} - Store stock amended to {qty}")
 
 
-book1 = BookshopStoreBook()
-book1.add_book("Little Red Riding Hood", "£20.00")
-print(book1.bookshop_books)
-book1.set_qty(1, 10)
-print(book1.bookshop_books)
+
