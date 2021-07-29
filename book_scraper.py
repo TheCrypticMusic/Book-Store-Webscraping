@@ -1,5 +1,7 @@
-from save_to_file import CSVFile, TxtFile
-from books import Book, BookshopStoreBook, BookshopWebiteBook  
+
+from abc import abstractmethod
+from file_manager import SQLite3DB
+from books import BookshopWebiteBook  
 import requests
 from bs4 import BeautifulSoup
 
@@ -20,13 +22,21 @@ class WebsiteScraper:
 
     def __init__(self, html_response):
         self.html_response = html_response
-        self.get_html()
+        self.__get_html()
 
-    def get_html(self) -> str:
+    def __get_html(self) -> str:
         self.soup = BeautifulSoup(self.html_response, "lxml")
         return self.soup
 
     def get_href_links(self, tag="href") -> list:
+        """Grabs all href's on a page
+
+        Args:
+            tag (str, optional): Defaults to "href".
+
+        Returns:
+            list: href's in a list
+        """
         href_list = []
         for a_tag in self.soup.find_all("a", href=True):
             href_list.append(a_tag[tag].strip())
@@ -58,28 +68,42 @@ class WebsiteScraper:
             tag_results.append(html.text.strip())
         return tag_results
 
-    def move_to_next_page(self, next_page_tag):
+    @abstractmethod
+    def next_page(self):
         pass
 
 class BookshopWebsiteScraper(WebsiteScraper):
 
     def set_books(self, title: str, price: str):
+        """Sets books from the website into a dict
+
+        Args:
+            title (str): [description]
+            price (str): [description]
+        """
         for book_title, book_price in zip(price, title):
             bookshop_book = BookshopWebiteBook()
             bookshop_book.add_book(book_title, book_price)
 
 
-website = Website("https://books.toscrape.com").connect()
+    def next_page(self, page_number: int):
+        """Can be used in conjuction with a loop where you increment numbers (page numbers)
+        Exampe: 
+            website = Website("https://books.toscrape.com").connect()
 
-book_test = BookshopWebsiteScraper(website)
-prices = book_test.get_tag("p")
-books = book_test.get_tag("h3")
-clean_prices = book_test.clean_tag_results(prices, "Â", "In stock")
-book_test.set_books(clean_prices, books)
+            for page_number in range(2, 5):
+                book_test = BookshopWebsiteScraper(website)
+                prices = book_test.get_tag("p")
+                books = book_test.get_tag("h3")
+                clean_prices = book_test.clean_tag_results(prices, "Â", "In stock")
+                book_test.set_books(clean_prices, books)
+                website = book_test.next_page(page_number)
+        Args:
+            page_number (int)
 
-test = BookshopStoreBook()
-test.add_book("test", "£test")
-test.show_all_books_by_store()
-
-test1 = BookshopWebiteBook()
-test1.show_all_books_by_store()
+        Returns:
+            [Request]
+        """
+        url = f"https://books.toscrape.com/catalogue/page-{page_number}.html"
+        next_page_url = Website(url).connect()
+        return next_page_url
